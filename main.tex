@@ -1,0 +1,200 @@
+%% -*- coding: utf-8 -*-
+\documentclass[12pt,a4paper]{scrartcl} 
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+\usepackage{misccorr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\lstset{
+  language=TypeScript,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{green},
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=10pt,
+  backgroundcolor=\color{white},
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  frame=none, 
+  tabsize=2,
+  captionpos=b,
+  breaklines=true,
+  breakatwhitespace=false,
+  title=\lstname
+}
+\begin{document}
+	\begin{titlepage}
+		\begin{center}
+			\large
+			МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ
+			
+			Федеральное государственное бюджетное образовательное учреждение высшего образования
+			
+			\textbf{АДЫГЕЙСКИЙ ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ}
+			\vspace{0.25cm}
+			
+			Инженерно-физический факультет
+			
+			Кафедра автоматизированных систем обработки информации и управления
+			\vfill
+			
+			\textsc{Отчет по практике}\\[5mm]
+			
+			{\LARGE Программная визуализация структуры данных \textit{Расстояние Левенштейна}}
+			\bigskip
+			
+			2 курс, группа 2ИВТ АСОИУ
+		\end{center}
+		\vfill
+		
+		\newlength{\ML}
+		\settowidth{\ML}{«\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}}}
+		\hfill\begin{minipage}{0.5\textwidth}
+			Выполнил:\\
+			\underline{\hspace{\ML}} Я. И. Бармин\\
+			«\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}} 2025 г.
+		\end{minipage}%
+		\bigskip
+		
+		\hfill\begin{minipage}{0.5\textwidth}
+			Руководитель:\\
+			\underline{\hspace{\ML}} С.\,В.~Теплоухов\\
+			«\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}} 2025 г.
+		\end{minipage}%
+		\vfill
+		
+		\begin{center}
+			Майкоп, 2025 г.
+		\end{center}
+	\end{titlepage}
+
+    \newpage
+
+\section{Введение}
+\label{sec:intro}
+
+\subsection{Текстовая формулировка задачи (Вариант 7)}
+Реализовать программу, которая будет находить расстояние Левенштейна.
+
+\subsection{Теория метода}
+
+Расстояние Левенштейна (редакционное расстояние, дистанция редактирования) — метрика, измеряющая по модулю разность между двумя последовательностями символов. Она определяется как минимальное количество односимвольных операций (а именно вставки, удаления, замены), необходимых для превращения одной последовательности символов в другую.  
+
+Будем считать, что элементы строк нумеруются с первого, как принято в математике, а не нулевого. 
+
+Пусть S1 и S2 — две строки (длиной M и N соответственно) над некоторым алфавитом, тогда редакционное расстояние d(S1,S2) можно подсчитать по следующей рекуррентной формуле: 
+
+ d(S1,S2)=D(M,N), где 
+ \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{333.png}
+    \label{fig:desktop-view}
+\end{figure}
+min(a,b,c) возвращает наименьший из аргументов.
+
+Для нахождения расстояния Левенштейна необходимо:
+
+1. Создание матрицы:
+Создается матрица D размером (m+1) x (n+1), где m и n - длины двух строк. Первая строка и столбец заполняются нулями, что соответствует расстоянию между пустой строкой и префиксами каждой из строк.
+
+2. Заполнение матрицы:
+Для каждого элемента матрицы D[i][j], где i и j - индексы символов в строках, выполняется следующее:
+Если s1[i-1] (i-й символ первой строки) равен s2[j-1] (j-й символ второй строки), то D[i][j] = D[i-1][j-1] (расстояние между префиксами остаётся прежним).
+В противном случае D[i][j] принимает минимальное значение из следующих операций:
+D[i-1][j] + 1 (удаление символа из первой строки).
+D[i][j-1] + 1 (вставка символа во вторую строку).
+D[i-1][j-1] + 1 (замена символа).
+
+3. Результат:
+Значение в ячейке D[m][n] будет искомым расстоянием Левенштейна между двумя строками.
+
+\subsection{Код приложения}
+
+
+\begin{verbatim}
+def levenshtein_distance(s1, s2, insert_cost=1, delete_cost=1, replace_cost=1):
+    M = len(s1)
+    N = len(s2)
+
+    # Создаем матрицу D размером (M+1) x (N+1)
+    D = [[0] * (N + 1) for _ in range(M + 1)]
+
+    # Инициализация первой строки и первого столбца
+    for i in range(1, M + 1):
+        D[i][0] = D[i - 1][0] + delete_cost
+    for j in range(1, N + 1):
+        D[0][j] = D[0][j - 1] + insert_cost
+
+    # Заполнение матрицы
+    for i in range(1, M + 1):
+        for j in range(1, N + 1):
+            if s1[i - 1] != s2[j - 1]:
+                cost_replace = D[i - 1][j - 1] + replace_cost
+            else:
+                cost_replace = D[i - 1][j - 1]
+            cost_delete = D[i - 1][j] + delete_cost
+            cost_insert = D[i][j - 1] + insert_cost
+
+            D[i][j] = min(cost_delete, cost_insert, cost_replace)
+
+    return D[M][N]
+# Меню программы
+def main():
+    while True:
+        print("\nМеню:")
+        print("1. Вычислить расстояние Левенштейна")
+        print("2. Выйти")
+        choice = input("Выберите действие (1/2): ")
+
+        if choice == '1':
+            str1 = input("Введите первое слово: ")
+            str2 = input("Введите второе слово: ")
+            distance = levenshtein_distance(str1, str2)
+            print(f"Расстояние Левенштейна между '{str1}' и '{str2}': {distance}")
+        elif choice == '2':
+            print("Выход из программы.")
+            break
+        else:
+            print("Некорректный выбор. Попробуйте снова.")
+
+if __name__ == "__main__":
+    main()
+
+\end{verbatim}
+
+
+\section{Скриншот программы}
+\label{sec:program-shots}
+
+На следующем изображении представлен пример интерфейса реализованной программы:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{file.png}
+    \caption{Внешний вид программы на компьютере}
+    \label{fig:desktop-view}
+\end{figure}
+
+\section{Источники}
+
+\begin{thebibliography}{9}
+\bibitem{Knuth-2003}Кнут Д.Э. Всё про \TeX. \newblock --- Москва: Изд. Вильямс, 2003 г. 550~с.
+\bibitem{Lvovsky-2003}Львовский С.М. Набор и верстка в системе \LaTeX{}. \newblock --- 3-е издание, исправленное и дополненное, 2003 г.
+\bibitem{Voroncov-2005}Воронцов К.В. \LaTeX{} в примерах. 2005 г.
+\bibitem{Voroncov-2}В. А. Глушков, В. В. Воронцов, А. В. Кузнецов - "Алгоритмы и структуры данных" 
+\bibitem{Michael}"Data Structures and Algorithms in Python" (Michael T. Goodrich, Roberto Tamassia, Michael H. Goldwasser)
+\bibitem{medium} https://medium.com/analytics-vidhya/levenshtein-distance-for-dummies-dd9eb83d3e09
+\bibitem{habr} https://habr.com/ru/post/117063/
+\bibitem{tirinox} https://tirinox.ru/levenstein-python/
+\end{thebibliography}
+
+\section{Доступ к исходному коду и результатам работы}
+\item Репозиторий: \texttt{\url{https://github.com/qwertyjar/Levenshtein}}
+\end{document}
